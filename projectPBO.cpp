@@ -1,10 +1,8 @@
 #include <iostream>
 #include <vector>
-#include <string>
 #include <algorithm>
 using namespace std;
 
-// ================= CLASS SAMPAH =================
 class Sampah {
 protected:
     string jenis;
@@ -33,7 +31,6 @@ public:
     }
 };
 
-// ================= INHERITANCE =================
 class Plastik : public Sampah {
 public:
     Plastik(float berat)
@@ -52,17 +49,11 @@ public:
         : Sampah("Logam", berat, berat * 15) {}
 };
 
-// ================= CLASS USER =================
 class User {
 private:
     string nama;
-
-    // poin aktif untuk ditukar
     float totalPoin;
-
-    // poin total untuk ranking
     float totalPoinRanking;
-
     float totalBerat;
 
     vector<Sampah*> daftarSampah;
@@ -87,11 +78,6 @@ public:
         return totalPoinRanking;
     }
 
-    float getBerat() {
-        return totalBerat;
-    }
-
-    // ================= LEVEL USER =================
     string getLevel() {
 
         if (totalPoinRanking >= 0 && totalPoinRanking <= 100) {
@@ -105,16 +91,12 @@ public:
         }
     }
 
-    // ================= TAMBAH SAMPAH =================
     void tambahSampah(Sampah* s) {
 
         daftarSampah.push_back(s);
 
         totalPoin += s->getPoin();
-
-        // untuk ranking
         totalPoinRanking += s->getPoin();
-
         totalBerat += s->getBerat();
 
         cout << "\nSampah berhasil ditambahkan!" << endl;
@@ -122,12 +104,12 @@ public:
         cout << "Level anda sekarang : " << getLevel() << endl;
     }
 
-    // ================= LIHAT DATA SAMPAH =================
     void lihatDataSampah() {
 
         cout << "\n===== DATA SAMPAH =====" << endl;
 
         if (daftarSampah.empty()) {
+
             cout << "Belum ada data sampah.\n";
             return;
         }
@@ -143,7 +125,6 @@ public:
         cout << "Total Poin  : " << totalPoin << endl;
     }
 
-    // ================= LIHAT DATA USER =================
     void lihatDataUser() {
 
         cout << "\n===== DATA USER =====" << endl;
@@ -154,7 +135,6 @@ public:
         cout << "Level User       : " << getLevel() << endl;
     }
 
-    // ================= TUKAR POIN =================
     void tukarPoin() {
 
         if (totalPoin == 0) {
@@ -171,7 +151,15 @@ public:
         cout << "Total poin anda : " << totalPoin << endl;
 
         cout << "Masukkan poin yang ingin ditukar : ";
-        cin >> poin;
+
+        if (!(cin >> poin)) {
+
+            cin.clear();
+            cin.ignore(1000, '\n');
+
+            cout << "Input harus berupa angka!\n";
+            return;
+        }
 
         if (poin > totalPoin) {
 
@@ -190,7 +178,6 @@ public:
     }
 };
 
-// ================= VALIDASI INPUT =================
 bool validasiInput(string input) {
 
     if (input.find(',') != string::npos) {
@@ -229,7 +216,6 @@ bool validasiInput(string input) {
     return true;
 }
 
-// ================= MAIN =================
 int main() {
 
     vector<User> daftarUser;
@@ -247,22 +233,45 @@ int main() {
         cout << "3. Lihat Ranking" << endl;
         cout << "4. Keluar" << endl;
         cout << "Pilih menu : ";
-        cin >> menuAwal;
 
-        // ================= TAMBAH USER =================
+        if (!(cin >> menuAwal)) {
+    
+            cin.clear();
+            cin.ignore(1000, '\n');
+
+            cout << "\nInput harus berupa angka!\n";
+            continue;
+        }
+
         if (menuAwal == 1) {
 
             string nama;
+            bool sudahAda = false;
 
             cout << "Masukkan username : ";
             cin >> nama;
 
-            daftarUser.push_back(User(nama));
+            for (int i = 0; i < daftarUser.size(); i++) {
 
-            cout << "User berhasil ditambahkan!\n";
+                if (daftarUser[i].getNama() == nama) {
+
+                    sudahAda = true;
+                    break;
+                }
+            }
+
+            if (sudahAda) {
+
+                cout << "Username sudah digunakan!\n";
+            }
+            else {
+
+                daftarUser.push_back(User(nama));
+
+                cout << "User berhasil ditambahkan!\n";
+            }
         }
 
-        // ================= LOGIN USER =================
         else if (menuAwal == 2) {
 
             string nama;
@@ -292,11 +301,18 @@ int main() {
                         cout << "6. Tukar Poin" << endl;
                         cout << "7. Logout" << endl;
                         cout << "Pilih menu : ";
-                        cin >> pilihan;
+
+                        if (!(cin >> pilihan)) {
+
+                            cin.clear();
+                            cin.ignore(1000, '\n');
+
+                            cout << "\nInput harus berupa angka!\n";
+                            continue;
+                        }
 
                         switch (pilihan) {
 
-                        // ================= PLASTIK =================
                         case 1:
 
                             cout << "\n=== Sampah Plastik ===" << endl;
@@ -313,18 +329,32 @@ int main() {
                             if (!validasiInput(inputBerat))
                                 break;
 
-                            berat = stof(inputBerat);
+                            try {
 
-                            if (berat <= 0) {
+                                berat = stof(inputBerat);
 
-                                cout << "Berat tidak valid!\n";
+                                if (berat <= 0) {
+
+                                    cout << "Berat tidak valid!\n";
+                                    break;
+                                }
+
+                                if (berat > 10000) {
+
+                                    cout << "Berat terlalu besar! Maksimal 10.000 kg\n";
+                                    break;
+                                }
+                            }
+
+                            catch (...) {
+
+                                cout << "Angka terlalu besar atau tidak valid!\n";
                                 break;
                             }
 
                             daftarUser[i].tambahSampah(new Plastik(berat));
                             break;
 
-                        // ================= ORGANIK =================
                         case 2:
 
                             cout << "\n=== Sampah Organik ===" << endl;
@@ -341,18 +371,32 @@ int main() {
                             if (!validasiInput(inputBerat))
                                 break;
 
-                            berat = stof(inputBerat);
+                            try {
 
-                            if (berat <= 0) {
+                                berat = stof(inputBerat);
 
-                                cout << "Berat tidak valid!\n";
+                                if (berat <= 0) {
+
+                                    cout << "Berat tidak valid!\n";
+                                    break;
+                                }
+
+                                if (berat > 10000) {
+
+                                    cout << "Berat terlalu besar! Maksimal 10.000 kg\n";
+                                    break;
+                                }
+                            }
+
+                            catch (...) {
+
+                                cout << "Angka terlalu besar atau tidak valid!\n";
                                 break;
                             }
 
                             daftarUser[i].tambahSampah(new Organik(berat));
                             break;
 
-                        // ================= LOGAM =================
                         case 3:
 
                             cout << "\n=== Sampah Logam ===" << endl;
@@ -369,39 +413,50 @@ int main() {
                             if (!validasiInput(inputBerat))
                                 break;
 
-                            berat = stof(inputBerat);
+                            try {
 
-                            if (berat <= 0) {
+                                berat = stof(inputBerat);
 
-                                cout << "Berat tidak valid!\n";
+                                if (berat <= 0) {
+
+                                    cout << "Berat tidak valid!\n";
+                                    break;
+                                }
+
+                                if (berat > 10000) {
+
+                                    cout << "Berat terlalu besar! Maksimal 10.000 kg\n";
+                                    break;
+                                }
+                            }
+
+                            catch (...) {
+
+                                cout << "Angka terlalu besar atau tidak valid!\n";
                                 break;
                             }
 
                             daftarUser[i].tambahSampah(new Logam(berat));
                             break;
 
-                        // ================= DATA SAMPAH =================
                         case 4:
                             daftarUser[i].lihatDataSampah();
                             break;
 
-                        // ================= DATA USER =================
                         case 5:
                             daftarUser[i].lihatDataUser();
                             break;
 
-                        // ================= TUKAR POIN =================
                         case 6:
                             daftarUser[i].tukarPoin();
                             break;
 
-                        // ================= LOGOUT =================
                         case 7:
                             cout << "\nLogout berhasil.\n";
                             break;
 
                         default:
-                            cout << "Pilihan tidak valid!\n";
+                            cout << "\nPilihan tidak valid!\n";
                         }
 
                     } while (pilihan != 7);
@@ -413,7 +468,6 @@ int main() {
             }
         }
 
-        // ================= RANKING =================
         else if (menuAwal == 3) {
 
             if (daftarUser.empty()) {
@@ -442,7 +496,6 @@ int main() {
             }
         }
 
-        // ================= KELUAR =================
         else if (menuAwal == 4) {
 
             cout << "\nTerima kasih telah menggunakan program.\n";
@@ -450,7 +503,7 @@ int main() {
 
         else {
 
-            cout << "Pilihan tidak valid!\n";
+            cout << "\nPilihan tidak valid!\n";
         }
 
     } while (menuAwal != 4);
